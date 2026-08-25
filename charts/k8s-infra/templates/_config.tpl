@@ -319,6 +319,8 @@ service:
 {{- end }}
 
 {{- define "opentelemetry-collector.otlpExporterConfig" -}}
+{{- $defaultHeaders := dict "signoz-access-token" "${env:SIGNOZ_API_KEY}" -}}
+{{- $headers := merge (deepCopy (.Values.otelExporterHeaders | default dict)) $defaultHeaders -}}
 exporters:
 {{- if .Values.presets.otlphttpExporter.enabled}}
   otlphttp:
@@ -336,8 +338,12 @@ exporters:
       ca_file: ${env:OTEL_SECRETS_PATH}/ca.pem
       {{- end }}
       {{- end }}
+    {{- with $headers }}
     headers:
-      "signoz-access-token": "${env:SIGNOZ_API_KEY}"
+      {{- range $k, $v := . }}
+      {{ $k | quote }}: {{ printf "%v" $v | quote }}
+      {{- end }}
+    {{- end }}
 {{- end }}
 
 {{- define "opentelemetry-collector.applyClusterMetricsConfig" -}}

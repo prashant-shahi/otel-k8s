@@ -40,6 +40,11 @@ clusterName: ""
 # If set to null and the chart is installed as a dependency, it will attempt
 # to autogenerate the endpoint of the SigNoz OtelCollector.
 otelCollectorEndpoint: null
+# Extra headers sent with every OTLP export request.
+# Values may reference env vars, e.g. ${env:MY_TOKEN}
+otelExporterHeaders: {}
+  # x-tenant-id: "acme"
+  # authorization: "Bearer ${env:AUTH_TOKEN}"
 # otelInsecure -- Whether the OTLP endpoint is insecure.
 # @section -- General Configuration
 # Set this to false in case of a secure OTLP endpoint.
