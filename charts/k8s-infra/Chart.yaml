@@ -1,24 +1,16 @@
 apiVersion: v2
 name: k8s-infra
-description: Helm chart for collecting metrics and logs in K8s
+description: Helm chart for collecting Kubernetes metrics, logs and events with OpenTelemetry
 type: application
-version: 0.17.0
+version: 1.0.0
 appVersion: "0.139.0"
-home: https://signoz.io
-icon: https://signoz.io/img/SigNozLogo-orange.svg
 keywords:
-  - SigNoz
   - OpenTelemetry
-  - apm
+  - otel
+  - kubernetes
+  - observability
   - monitoring
   - logs
+  - metrics
 sources:
-  - https://github.com/signoz/charts
   - https://github.com/open-telemetry/opentelemetry-collector-contrib
-maintainers:
-  - name: SigNoz
-    email: hello@signoz.io
-    url: https://signoz.io
-  - name: prashant-shahi
-    email: prashant@signoz.io
-    url: https://prashantshahi.dev

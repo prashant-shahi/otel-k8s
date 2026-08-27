@@ -4,9 +4,9 @@ Thank you for your interest in contributing to our project! We greatly value fee
 ## How can I contribute?
 
 ### Finding Issues to Work On
-- Check our [existing open issues](https://github.com/SigNoz/charts/issues?q=is%3Aopen+is%3Aissue)
-- Look for [good first issues](https://github.com/SigNoz/charts/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to start with
-- Review [recently closed issues](https://github.com/SigNoz/charts/issues?q=is%3Aissue+is%3Aclosed) to avoid duplicates
+- Check our [existing open issues](https://github.com/prashant-shahi/otel-k8s/issues?q=is%3Aopen+is%3Aissue)
+- Look for [good first issues](https://github.com/prashant-shahi/otel-k8s/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to start with
+- Review [recently closed issues](https://github.com/prashant-shahi/otel-k8s/issues?q=is%3Aissue+is%3Aclosed) to avoid duplicates
 
 ### Submitting Pull Requests
 1. **Development**:
@@ -29,21 +29,36 @@ For substantial changes, please split your contribution into multiple PRs:
 We follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). All commits and PRs should include type specifiers (e.g., `feat:`, `fix:`, `docs:`, etc.).
 
 ## How can I contribute to the charts repository?
-There are primarily 3 charts in the SigNoz Helm Charts repository:
-- signoz: signoz, signoz otel collector and schema Migrator
-- clickhouse: clickhouse and zookeeper
-- k8s-infra: k8s-infra collection agent
+There are 2 charts in this repository:
+- `k8s-infra`: OpenTelemetry collection agents (DaemonSet + Deployment) for Kubernetes telemetry
+- `otel-gateway`: OpenTelemetry gateway collector
+
+Both charts are vendor-neutral. When contributing, avoid introducing
+backend-specific naming, hardcoded ingestion headers, or vendor documentation
+links — expose them as configurable values instead.
 
 
 ## Where do I go from here? 
 ### To run the helm chart for local development
-- run `git clone https://github.com/SigNoz/charts.git` followed by `cd charts`
+- run `git clone https://github.com/prashant-shahi/otel-k8s.git` followed by `cd otel-k8s`
 - It is recommended to use a lightweight Kubernetes (k8s) cluster for local development:
   - [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
   - [k3d](https://k3d.io/#installation)
   - [minikube](https://minikube.sigs.k8s.io/docs/start/)
 - Create a k8s cluster and make sure `kubectl` points to the locally created k8s cluster
 
+### To run the tests
+Install the [helm-unittest](https://github.com/helm-unittest/helm-unittest) plugin, then:
+
+```bash
+make test
+```
+
+Regenerate chart documentation after changing any `values.yaml`:
+
+```bash
+make chart-docs
+```
+
 ## How can I get help?
-Need assistance? Join our Slack community:
-- [`#contributing`](https://signoz-community.slack.com/archives/C01LWQ8KS7M)
+Open an [issue](https://github.com/prashant-shahi/otel-k8s/issues) if you need assistance.

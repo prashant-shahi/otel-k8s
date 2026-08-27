@@ -1,0 +1,15 @@
+apiVersion: v2
+name: otel-gateway
+description: A Helm chart for deploying an OpenTelemetry gateway collector
+type: application
+version: 0.1.0
+appVersion: "v0.0.16"
+keywords:
+  - OpenTelemetry
+  - otel
+  - gateway
+  - observability
+  - monitoring
+sources:
+  - https://github.com/open-telemetry/opentelemetry-collector
+  - https://github.com/open-telemetry/opentelemetry-collector-contrib

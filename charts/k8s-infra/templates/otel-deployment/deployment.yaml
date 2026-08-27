@@ -95,10 +95,10 @@ spec:
           env:
             {{- include "snippet.otlp-env" . | nindent 12 }}
             {{- include "snippet.k8s-env" . | nindent 12 }}
-            - name: SIGNOZ_COMPONENT
+            - name: OTEL_COMPONENT
               value: {{ default "otel-deployment" .Values.otelDeployment.name }}
             - name: OTEL_RESOURCE_ATTRIBUTES
-              value: signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME)
+              value: otel.component=$(OTEL_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME)
             {{- include "renderAdditionalEnv" .Values.otelDeployment.additionalEnvs | nindent 12 }}
           volumeMounts:
             - name: otel-deployment-config-vol

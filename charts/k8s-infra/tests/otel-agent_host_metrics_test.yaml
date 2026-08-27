@@ -10,6 +10,8 @@ set:
       enabled: false
     otlpExporter:
       enabled: false
+    otlphttpExporter:
+      enabled: false
     logsCollection:
       enabled: false
     hostMetrics:
