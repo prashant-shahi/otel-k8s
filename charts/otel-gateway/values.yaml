@@ -1,8 +1,10 @@
 # Default values for otel-gateway.
 replicaCount: 1
 image:
-  # Default gateway collector image. Override this with your own
-  # OpenTelemetry Collector distribution if you build one.
+  # NOTE: this image is not publicly pullable and the chart will not start
+  # without an override. It expects a distribution providing
+  # /usr/local/bin/otelgateway with a `migrate` subcommand.
+  # Set this to your own gateway collector image before installing.
   repository: docker.io/signoz/signoz-otel-gateway
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
