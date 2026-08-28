@@ -5,7 +5,7 @@
 
 Monitoring your Kubernetes cluster is essential for ensuring performance, stability, and reliability. The `k8s-infra` Helm chart provides a comprehensive solution for collecting metrics, logs, and events from your entire Kubernetes environment and exporting them over OTLP to any OpenTelemetry-compatible backend.
 
-### Quick start
+### TL;DR
 
 ```sh
 helm repo add otel-k8s https://prashant-shahi.github.io/otel-k8s

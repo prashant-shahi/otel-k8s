@@ -11,7 +11,7 @@ backend that speaks the protocol.
 | [`k8s-infra`](./charts/k8s-infra) | DaemonSet and Deployment OpenTelemetry Collectors that gather node and pod metrics, container logs, and Kubernetes events. |
 | [`otel-gateway`](./charts/otel-gateway) | An OpenTelemetry gateway collector that fronts OTLP traffic for a cluster. |
 
-## Quick start
+## TL;DR
 
 ```bash
 helm repo add otel-k8s https://prashant-shahi.github.io/otel-k8s
