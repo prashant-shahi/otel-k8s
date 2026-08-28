@@ -1,3 +1,51 @@
 apiVersion: v1
-entries: {}
-generated: "2026-08-28T00:00:00.000000000Z"
+entries:
+  k8s-infra:
+  - apiVersion: v2
+    appVersion: 0.139.0
+    created: "2026-08-28T07:05:10.554449529Z"
+    description: Helm chart for collecting Kubernetes metrics, logs and events with
+      OpenTelemetry
+    digest: bfe071ef587eb50450699f0b7e8db280dd0165528b706204f803dfb6d8eab36a
+    keywords:
+    - OpenTelemetry
+    - otel
+    - kubernetes
+    - observability
+    - monitoring
+    - logs
+    - metrics
+    maintainers:
+    - name: prashant-shahi
+      url: https://github.com/prashant-shahi
+    name: k8s-infra
+    sources:
+    - https://github.com/open-telemetry/opentelemetry-collector-contrib
+    type: application
+    urls:
+    - https://github.com/prashant-shahi/otel-k8s/releases/download/k8s-infra-1.0.0/k8s-infra-1.0.0.tgz
+    version: 1.0.0
+  otel-gateway:
+  - apiVersion: v2
+    appVersion: 0.139.0
+    created: "2026-08-28T07:05:10.722467189Z"
+    description: A Helm chart for deploying an OpenTelemetry gateway collector
+    digest: cfbedd74f103731b5a8dfa85b2154402a404f541da2faf816d77fe6ad2533b2c
+    keywords:
+    - OpenTelemetry
+    - otel
+    - gateway
+    - observability
+    - monitoring
+    maintainers:
+    - name: prashant-shahi
+      url: https://github.com/prashant-shahi
+    name: otel-gateway
+    sources:
+    - https://github.com/open-telemetry/opentelemetry-collector
+    - https://github.com/open-telemetry/opentelemetry-collector-contrib
+    type: application
+    urls:
+    - https://github.com/prashant-shahi/otel-k8s/releases/download/otel-gateway-0.1.0/otel-gateway-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-08-28T07:05:10.722473929Z"
