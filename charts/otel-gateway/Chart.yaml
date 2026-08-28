@@ -13,3 +13,6 @@ keywords:
 sources:
   - https://github.com/open-telemetry/opentelemetry-collector
   - https://github.com/open-telemetry/opentelemetry-collector-contrib
+maintainers:
+  - name: prashant-shahi
+    url: https://github.com/prashant-shahi
