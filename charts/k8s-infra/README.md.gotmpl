@@ -36,10 +36,6 @@ helm repo update
 helm -n platform --create-namespace install "my-release" otel-k8s/k8s-infra
 ```
 
-No chart versions have been published yet, so the repository index is still
-empty. Until the first release lands, install from a clone of this repo with
-`helm install ... ./charts/k8s-infra` instead.
-
 #### Pointing the chart at your backend
 
 ```yaml

@@ -20,10 +20,6 @@ helm install -n platform --create-namespace my-release otel-k8s/k8s-infra \
   --set otelCollectorEndpoint=https://otlp.example.com:443
 ```
 
-No chart versions have been published yet, so the repository index is still
-empty. Until the first release lands, install from a clone of this repo with
-`helm install ... ./charts/k8s-infra` instead.
-
 ## Before you begin
 
 ### Set up a Kubernetes cluster
