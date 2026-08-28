@@ -221,8 +221,10 @@ exporters:
     tls:
       insecure: {{ if .Values.presets.selfTelemetry.endpoint }}{{ .Values.presets.selfTelemetry.insecure }}{{ else }}{{ .Values.otelInsecure }}{{ end }}
       insecure_skip_verify: {{ if .Values.presets.selfTelemetry.endpoint }}{{ .Values.presets.selfTelemetry.insecureSkipVerify }}{{ else }}{{ .Values.insecureSkipVerify }}{{ end }}
+    {{- with (include "otel.selfTelemetry.headers" .) }}
     headers:
-      "signoz-ingestion-key": "${env:SIGNOZ_SELF_TELEMETRY_API_KEY}"
+      {{- . | nindent 6 }}
+    {{- end }}
 {{- end }}
 
 {{/*
@@ -241,8 +243,10 @@ service:
               endpoint: {{ if .Values.presets.selfTelemetry.endpoint -}}{{ .Values.presets.selfTelemetry.endpoint }}{{- else -}}${env:OTEL_EXPORTER_OTLP_ENDPOINT}{{ end }}
               insecure: {{ if .Values.presets.selfTelemetry.endpoint -}}{{ .Values.presets.selfTelemetry.insecure }}{{- else -}}{{ .Values.otelInsecure }}{{ end }}
               compression: gzip
+              {{- with (include "otel.selfTelemetry.headers" .) }}
               headers:
-                "signoz-ingestion-key": "${env:SIGNOZ_SELF_TELEMETRY_API_KEY}"
+                {{- . | nindent 16 }}
+              {{- end }}
       propagators:
       - tracecontext
       - b3
@@ -265,8 +269,10 @@ service:
                 endpoint: {{ if .Values.presets.selfTelemetry.endpoint -}}{{ .Values.presets.selfTelemetry.endpoint }}{{- else -}}${env:OTEL_EXPORTER_OTLP_ENDPOINT}{{ end }}
                 insecure: {{ if .Values.presets.selfTelemetry.endpoint -}}{{ .Values.presets.selfTelemetry.insecure }}{{- else -}}{{ .Values.otelInsecure }}{{ end }}
                 compression: gzip
+                {{- with (include "otel.selfTelemetry.headers" .) }}
                 headers:
-                  "signoz-ingestion-key": "${env:SIGNOZ_SELF_TELEMETRY_API_KEY}"
+                  {{- . | nindent 18 }}
+                {{- end }}
 {{- end }}
 
 {{/*
@@ -319,8 +325,7 @@ service:
 {{- end }}
 
 {{- define "opentelemetry-collector.otlpExporterConfig" -}}
-{{- $defaultHeaders := dict "signoz-access-token" "${env:SIGNOZ_API_KEY}" -}}
-{{- $headers := merge (deepCopy (.Values.otelExporterHeaders | default dict)) $defaultHeaders -}}
+{{- $headers := .Values.otelExporterHeaders | default dict -}}
 exporters:
 {{- if .Values.presets.otlphttpExporter.enabled}}
   otlphttp:
@@ -410,7 +415,7 @@ receivers:
     config:
       scrape_configs:
         {{- if .Values.presets.prometheus.enabled }}
-        - job_name: "signoz-scraper"
+        - job_name: "otel-scraper"
           scrape_interval: {{ .Values.presets.prometheus.scrapeInterval }}
           kubernetes_sd_configs:
             - role: pod
@@ -436,20 +441,20 @@ receivers:
               separator: ":"
               target_label: __address__
             - target_label: job_name
-              replacement: signoz-scraper
+              replacement: otel-scraper
             {{- if .Values.presets.prometheus.includePodLabel }}
             - action: labelmap
               regex: __meta_kubernetes_pod_label_(.+)
             {{- end }}
             - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
               action: replace
-              target_label: signoz_k8s_name
+              target_label: k8s_name
             - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_instance]
               action: replace
-              target_label: signoz_k8s_instance
+              target_label: k8s_instance
             - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
               action: replace
-              target_label: signoz_k8s_component
+              target_label: k8s_component
             - source_labels: [__meta_kubernetes_namespace]
               action: replace
               target_label: k8s_namespace_name
@@ -565,10 +570,10 @@ receivers:
       {{- $additionalInclude := .Values.presets.logsCollection.whitelist.additionalInclude }}
       # Include specific container's logs using whitelist config.
       # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
-      {{- if .Values.presets.logsCollection.whitelist.signozLogs }}
-      - /var/log/pods/{{ .Release.Namespace }}_{{ .Release.Name }}*-signoz-*/*/*.log
+      {{- if .Values.presets.logsCollection.whitelist.selfLogs }}
+      - /var/log/pods/{{ .Release.Namespace }}_{{ .Release.Name }}*-k8s-infra-*/*/*.log
       {{- if and .Values.namespace (ne .Release.Namespace .Values.namespace) }}
-      - /var/log/pods/{{ .Release.Namespace }}_{{ .Release.Name }}*-signoz-*/*/*.log
+      - /var/log/pods/{{ .Values.namespace }}_{{ .Release.Name }}*-k8s-infra-*/*/*.log
       {{- end }}
       {{- end }}
       {{- range $namespace := $namespaces }}
@@ -592,14 +597,12 @@ receivers:
     {{- $pods := .Values.presets.logsCollection.blacklist.pods }}
     {{- $containers := .Values.presets.logsCollection.blacklist.containers }}
     {{- $additionalExclude := .Values.presets.logsCollection.blacklist.additionalExclude }}
-    # Exclude specific container's logs using blacklist config or includeSigNozLogs flag.
+    # Exclude specific container's logs using blacklist config or the selfLogs flag.
     # The file format is /var/log/pods/<namespace_name>_<pod_name>_<pod_uid>/<container_name>/<run_id>.log
     exclude:
-      {{- if .Values.presets.logsCollection.blacklist.signozLogs }}
-      - /var/log/pods/{{ .Release.Namespace }}_{{ .Release.Name }}*-signoz-*/*/*.log
+      {{- if .Values.presets.logsCollection.blacklist.selfLogs }}
       - /var/log/pods/{{ .Release.Namespace }}_{{ .Release.Name }}*-k8s-infra-*/*/*.log
       {{- if and .Values.namespace (ne .Release.Namespace .Values.namespace) }}
-      - /var/log/pods/{{ .Release.Namespace }}_{{ .Release.Name }}*-signoz-*/*/*.log
       - /var/log/pods/{{ .Values.namespace }}_{{ .Release.Name }}*-k8s-infra-*/*/*.log
       {{- end }}
       {{- end }}

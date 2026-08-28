@@ -4,7 +4,7 @@ templates:
   - otel-agent/configmap.yaml
 release:
   name: k8s-infra
-  namespace: signoz
+  namespace: platform
 set:
   presets:
     prometheus:
@@ -12,6 +12,8 @@ set:
     debugExporter:
       enabled: false
     otlpExporter:
+      enabled: false
+    otlphttpExporter:
       enabled: false
     logsCollection:
       enabled: true
@@ -49,8 +51,7 @@ tests:
             receivers:
               filelog/k8s:
                 exclude:
-                - /var/log/pods/signoz_k8s-infra*-signoz-*/*/*.log
-                - /var/log/pods/signoz_k8s-infra*-k8s-infra-*/*/*.log
+                - /var/log/pods/platform_k8s-infra*-k8s-infra-*/*/*.log
                 - /var/log/pods/kube-system_*/*/*.log
                 - /var/log/pods/*_hotrod*_*/*/*.log
                 - /var/log/pods/*_locust*_*/*/*.log

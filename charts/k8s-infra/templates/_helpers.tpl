@@ -239,23 +239,12 @@ imagePullSecrets:
 {{- end }}
 
 {{/*
-Create a fully qualified app name for signoz.
+Create a fully qualified app name for the in-cluster OpenTelemetry Collector
+that this chart exports to when installed as a subchart.
 Assuming defaults for fullnameOverride and nameOverride.
 */}}
-{{- define "signoz.qualifiedname" -}}
-{{- $name := "signoz" }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create a fully qualified app name for otel-collector.
-*/}}
 {{- define "otel.qualifiedname" -}}
-{{- printf "%s-%s" (include "signoz.qualifiedname" .) "otel-collector" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Release.Name "otel-collector" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -399,15 +388,15 @@ OTLP exporter environment variables used by OtelAgent and OtelDeployment.
 {{- define "snippet.otlp-env" }}
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
   value: {{ include "otel.endpoint" . }}
-{{- if or .Values.apiKeyExistingSecretName .Values.signozApiKey }}
-- name: SIGNOZ_API_KEY
+{{- if or .Values.apiKeyExistingSecretName .Values.apiKey }}
+- name: OTEL_API_KEY
   valueFrom:
     secretKeyRef:
       name: {{ include "otel.apiKey.secretName" . }}
       key: {{ include "otel.apiKey.secretKey" . }}
 {{- end }}
-{{- if or .Values.presets.selfTelemetry.apiKeyExistingSecretName .Values.presets.selfTelemetry.signozApiKey }}
-- name: SIGNOZ_SELF_TELEMETRY_API_KEY
+{{- if or .Values.presets.selfTelemetry.apiKeyExistingSecretName .Values.presets.selfTelemetry.apiKey }}
+- name: OTEL_SELF_TELEMETRY_API_KEY
   valueFrom:
     secretKeyRef:
       name: {{ include "otel.selfTelemetry.apiKey.secretName" . }}
@@ -424,7 +413,7 @@ OTLP exporter environment variables used by OtelAgent and OtelDeployment.
 {{- end }}
 
 {{/*
-Secret name to be used for SigNoz API key.
+Secret name to be used for the OTLP backend API key.
 */}}
 {{- define "otel.apiKey.secretName" }}
 {{- if .Values.apiKeyExistingSecretName }}
@@ -435,20 +424,20 @@ Secret name to be used for SigNoz API key.
 {{- end }}
 
 {{/*
-Secret key to be used for SigNoz API key.
+Secret key to be used for the OTLP backend API key.
 */}}
 {{- define "otel.apiKey.secretKey" }}
 {{- if .Values.apiKeyExistingSecretName }}
 {{- required "You need to provide apiKeyExistingSecretKey when an apiKeyExistingSecretName is specified" .Values.apiKeyExistingSecretKey }}
 {{- else }}
-{{- print "signoz-apikey" }}
+{{- print "otel-apikey" }}
 {{- end }}
 {{- end }}
 
 
 
 {{/*
-Secret name to be used for SigNoz Self Telemetry API key.
+Secret name to be used for the self-telemetry API key.
 */}}
 {{- define "otel.selfTelemetry.apiKey.secretName" }}
 {{- if .Values.presets.selfTelemetry.apiKeyExistingSecretName }}
@@ -459,13 +448,23 @@ Secret name to be used for SigNoz Self Telemetry API key.
 {{- end }}
 
 {{/*
-Secret key to be used for SigNoz Self Telemetry API key.
+Secret key to be used for the self-telemetry API key.
 */}}
 {{- define "otel.selfTelemetry.apiKey.secretKey" }}
 {{- if .Values.presets.selfTelemetry.apiKeyExistingSecretName }}
 {{- required "You need to provide apiKeyExistingSecretKey when an apiKeyExistingSecretName is specified" .Values.presets.selfTelemetry.apiKeyExistingSecretKey }}
 {{- else }}
-{{- print "signoz-apikey" }}
+{{- print "otel-apikey" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Headers sent with self-telemetry OTLP exports.
+Rendered as YAML key/value pairs; empty when nothing is configured.
+*/}}
+{{- define "otel.selfTelemetry.headers" -}}
+{{- range $k, $v := (.Values.presets.selfTelemetry.headers | default dict) }}
+{{ $k | quote }}: {{ printf "%v" $v | quote }}
 {{- end }}
 {{- end }}
 

@@ -2,6 +2,8 @@ suite: Test otlp exporter setting
 templates:
   - otel-agent/configmap.yaml
 set:
+  otelExporterHeaders:
+    x-api-key: "${env:OTEL_API_KEY}"
   presets:
     # Disable other presets to focus on otlp exporter
     prometheus:
@@ -10,6 +12,8 @@ set:
       enabled: false
     otlpExporter:
       enabled: true
+    otlphttpExporter:
+      enabled: false
     logsCollection:
       enabled: false
     hostMetrics:
@@ -42,7 +46,7 @@ tests:
               otlp:
                 endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
                 headers:
-                  signoz-access-token: ${env:SIGNOZ_API_KEY}
+                  x-api-key: ${env:OTEL_API_KEY}
                 tls:
                   insecure: true
                   insecure_skip_verify: false
@@ -110,7 +114,7 @@ tests:
               otlphttp:
                 endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
                 headers:
-                  signoz-access-token: ${env:SIGNOZ_API_KEY}
+                  x-api-key: ${env:OTEL_API_KEY}
                 tls:
                   insecure: true
                   insecure_skip_verify: false

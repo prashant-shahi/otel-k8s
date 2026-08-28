@@ -34,17 +34,19 @@ enabled: true
 # clusterName -- Name of the K8s cluster. Used by OtelCollectors to attach in telemetry data.
 # @section -- General Configuration
 clusterName: ""
-# otelCollectorEndpoint -- Endpoint/IP Address of the SigNoz or any other OpenTelemetry backend.
+# otelCollectorEndpoint -- OTLP endpoint of the OpenTelemetry backend to export to.
 # @section -- General Configuration
-# Set it to `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud.
+# Point this at any OTLP-compatible backend, e.g. `https://otlp.example.com:443`.
 # If set to null and the chart is installed as a dependency, it will attempt
-# to autogenerate the endpoint of the SigNoz OtelCollector.
+# to autogenerate the endpoint of the in-cluster OpenTelemetry Collector.
 otelCollectorEndpoint: null
-# Extra headers sent with every OTLP export request.
-# Values may reference env vars, e.g. ${env:MY_TOKEN}
+# otelExporterHeaders -- Extra headers sent with every OTLP export request.
+# @section -- General Configuration
+# Values may reference env vars, e.g. `${env:OTEL_API_KEY}` for the key set in `apiKey`.
+# Use this to pass whatever authentication header your backend expects.
 otelExporterHeaders: {}
   # x-tenant-id: "acme"
-  # authorization: "Bearer ${env:AUTH_TOKEN}"
+  # authorization: "Bearer ${env:OTEL_API_KEY}"
 # otelInsecure -- Whether the OTLP endpoint is insecure.
 # @section -- General Configuration
 # Set this to false in case of a secure OTLP endpoint.
@@ -52,9 +54,10 @@ otelInsecure: true
 # insecureSkipVerify -- Whether to skip verifying the OTLP endpoint's certificate.
 # @section -- General Configuration
 insecureSkipVerify: false
-# signozApiKey -- API key for SigNoz Cloud.
+# apiKey -- API key for the OTLP backend, exposed to the collector as `${env:OTEL_API_KEY}`.
 # @section -- API Key Configuration
-signozApiKey: ""
+# Reference it from `otelExporterHeaders` using the header name your backend expects.
+apiKey: ""
 # apiKeyExistingSecretName -- Existing secret name to be used for the API key.
 # @section -- API Key Configuration
 apiKeyExistingSecretName: ""
@@ -91,7 +94,7 @@ namespace: ""
 # presets -- Presets to easily set up OtelCollector configurations.
 # @section -- Presets Configuration
 # @default -- "Please check out the values.yml for default values"
-# For more details, see the <a href="https://signoz.io/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/">documentation</a>
+# For more details, see the README of this chart.
 presets:
   # presets.debugExporter -- Configuration for the debug exporter, used for debugging telemetry data.
   # @section -- Debug Exporter Presets
@@ -136,9 +139,14 @@ presets:
     # presets.selfTelemetry.insecureSkipVerify - Whether to skip verifying the certificate for self-telemetry.
     # @section -- Self Telemetry Presets
     insecureSkipVerify: true
-    # presets.selfTelemetry.signozApiKey - API key for SigNoz Cloud for self-telemetry.
+    # presets.selfTelemetry.apiKey - API key for the self-telemetry backend,
+    # exposed to the collector as `${env:OTEL_SELF_TELEMETRY_API_KEY}`.
     # @section -- Self Telemetry Presets
-    signozApiKey: ""
+    apiKey: ""
+    # presets.selfTelemetry.headers - Headers sent with every self-telemetry OTLP export request.
+    # @section -- Self Telemetry Presets
+    # Values may reference env vars, e.g. `${env:OTEL_SELF_TELEMETRY_API_KEY}`.
+    headers: {}
     # presets.selfTelemetry.apiKeyExistingSecretName - Existing secret name for the self-telemetry API key.
     # @section -- Self Telemetry Presets
     apiKeyExistingSecretName: ""
@@ -196,9 +204,9 @@ presets:
       # presets.logsCollection.blacklist.enabled - Enable the blacklist.
       # @section -- Logs Collection Presets
       enabled: true
-      # presets.logsCollection.blacklist.signozLogs - Exclude SigNoz's own logs.
+      # presets.logsCollection.blacklist.selfLogs - Exclude this chart's own collector logs.
       # @section -- Logs Collection Presets
-      signozLogs: true
+      selfLogs: true
       # presets.logsCollection.blacklist.namespaces - List of namespaces to exclude from log collection.
       # @section -- Logs Collection Presets
       namespaces:
@@ -220,9 +228,9 @@ presets:
       # presets.logsCollection.whitelist.enabled - Enable the whitelist.
       # @section -- Logs Collection Presets
       enabled: false
-      # presets.logsCollection.whitelist.signozLogs - Include SigNoz's own logs.
+      # presets.logsCollection.whitelist.selfLogs - Include this chart's own collector logs.
       # @section -- Logs Collection Presets
-      signozLogs: true
+      selfLogs: false
       # presets.logsCollection.whitelist.namespaces - List of namespaces to include in log collection.
       # @section -- Logs Collection Presets
       namespaces: []
@@ -362,7 +370,7 @@ presets:
     insecureSkipVerify: true
     # presets.kubeletMetrics.extraMetadataLabels -- List of extra metadata labels to collect.
     # For GCP/GKE clusters, extraMetadataLabels may not be available due to kubelet configuration.
-    # See documentation for details: https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke/
+    # See the "GKE Autopilot" section of this chart's README for details.
     # @section -- Kubelet Metrics Presets
     extraMetadataLabels:
       - container.id
@@ -376,7 +384,7 @@ presets:
       - volume
     # presets.kubeletMetrics.metrics -- Fine-grained control over which Kubelet metrics are enabled.
     # Note: In GKE Autopilot clusters ("gcp/autogke"), request and limit metrics are not available to scrape due to Kubelet configuration.
-    # Check out the documentation for more details: https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke/
+    # See the "GKE Autopilot" section of this chart's README for details.
     # @section -- Kubelet Metrics Presets
     metrics:
       k8s.node.cpu.usage:
@@ -519,9 +527,9 @@ presets:
     # presets.prometheus.enabled -- Enable Prometheus metrics scraping.
     # @section -- Prometheus Metrics Presets
     enabled: false
-    # presets.prometheus.annotationsPrefix -- Prefix for the pod annotations used for metrics scraping (e.g., `signoz.io`).
+    # presets.prometheus.annotationsPrefix -- Prefix for the pod annotations used for metrics scraping (e.g., `opentelemetry.io`).
     # @section -- Prometheus Metrics Presets
-    annotationsPrefix: signoz.io
+    annotationsPrefix: opentelemetry.io
     # presets.prometheus.scrapeInterval -- How often to scrape metrics.
     # @section -- Prometheus Metrics Presets
     scrapeInterval: 60s
@@ -643,9 +651,9 @@ otelAgent:
   # otelAgent.podAnnotations -- Annotations for the OtelAgent pods.
   # @section -- OpenTelemetry Agent (DaemonSet)
   podAnnotations: {}
-    # signoz.io/scrape: 'true'
-    # signoz.io/port: '8888'
-    # signoz.io/path: /metrics
+    # opentelemetry.io/scrape: 'true'
+    # opentelemetry.io/port: '8888'
+    # opentelemetry.io/path: /metrics
 
   # otelAgent.additionalEnvs -- Additional environment variables for the OtelAgent container.
   # @section -- OpenTelemetry Agent (DaemonSet)
@@ -1114,9 +1122,9 @@ otelDeployment:
   # otelDeployment.podAnnotations -- Annotations for the OtelDeployment pods.
   # @section -- OpenTelemetry Deployment
   podAnnotations: {}
-    # signoz.io/scrape: 'true'
-    # signoz.io/port: '8888'
-    # signoz.io/path: /metrics
+    # opentelemetry.io/scrape: 'true'
+    # opentelemetry.io/port: '8888'
+    # opentelemetry.io/path: /metrics
 
   # otelDeployment.additionalEnvs -- Additional environment variables for the OtelDeployment container.
   # @section -- OpenTelemetry Deployment

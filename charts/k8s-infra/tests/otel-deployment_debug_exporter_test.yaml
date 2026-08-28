@@ -6,9 +6,11 @@ set:
     # Disable other presets to focus on debug exporter with prometheus enabled
     prometheus:
       enabled: true
-      annotationsPrefix: "signoz.io"
+      annotationsPrefix: "opentelemetry.io"
       scrapeInterval: 60s
     otlpExporter:
+      enabled: false
+    otlphttpExporter:
       enabled: false
     logsCollection:
       enabled: false
@@ -60,39 +62,39 @@ tests:
               prometheus/scraper:
                 config:
                   scrape_configs:
-                  - job_name: signoz-scraper
+                  - job_name: otel-scraper
                     kubernetes_sd_configs:
                     - role: pod
                     relabel_configs:
                     - action: keep
                       regex: true
                       source_labels:
-                      - __meta_kubernetes_pod_annotation_signoz_io_scrape
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_scrape
                     - action: replace
                       regex: (.+)
                       source_labels:
-                      - __meta_kubernetes_pod_annotation_signoz_io_path
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_path
                       target_label: __metrics_path__
                     - action: replace
                       separator: ':'
                       source_labels:
                       - __meta_kubernetes_pod_ip
-                      - __meta_kubernetes_pod_annotation_signoz_io_port
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_port
                       target_label: __address__
-                    - replacement: signoz-scraper
+                    - replacement: otel-scraper
                       target_label: job_name
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_name
-                      target_label: signoz_k8s_name
+                      target_label: k8s_name
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_instance
-                      target_label: signoz_k8s_instance
+                      target_label: k8s_instance
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_component
-                      target_label: signoz_k8s_component
+                      target_label: k8s_component
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_namespace
@@ -173,39 +175,39 @@ tests:
               prometheus/scraper:
                 config:
                   scrape_configs:
-                  - job_name: signoz-scraper
+                  - job_name: otel-scraper
                     kubernetes_sd_configs:
                     - role: pod
                     relabel_configs:
                     - action: keep
                       regex: true
                       source_labels:
-                      - __meta_kubernetes_pod_annotation_signoz_io_scrape
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_scrape
                     - action: replace
                       regex: (.+)
                       source_labels:
-                      - __meta_kubernetes_pod_annotation_signoz_io_path
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_path
                       target_label: __metrics_path__
                     - action: replace
                       separator: ':'
                       source_labels:
                       - __meta_kubernetes_pod_ip
-                      - __meta_kubernetes_pod_annotation_signoz_io_port
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_port
                       target_label: __address__
-                    - replacement: signoz-scraper
+                    - replacement: otel-scraper
                       target_label: job_name
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_name
-                      target_label: signoz_k8s_name
+                      target_label: k8s_name
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_instance
-                      target_label: signoz_k8s_instance
+                      target_label: k8s_instance
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_component
-                      target_label: signoz_k8s_component
+                      target_label: k8s_component
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_namespace
@@ -286,39 +288,39 @@ tests:
               prometheus/scraper:
                 config:
                   scrape_configs:
-                  - job_name: signoz-scraper
+                  - job_name: otel-scraper
                     kubernetes_sd_configs:
                     - role: pod
                     relabel_configs:
                     - action: keep
                       regex: true
                       source_labels:
-                      - __meta_kubernetes_pod_annotation_signoz_io_scrape
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_scrape
                     - action: replace
                       regex: (.+)
                       source_labels:
-                      - __meta_kubernetes_pod_annotation_signoz_io_path
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_path
                       target_label: __metrics_path__
                     - action: replace
                       separator: ':'
                       source_labels:
                       - __meta_kubernetes_pod_ip
-                      - __meta_kubernetes_pod_annotation_signoz_io_port
+                      - __meta_kubernetes_pod_annotation_opentelemetry_io_port
                       target_label: __address__
-                    - replacement: signoz-scraper
+                    - replacement: otel-scraper
                       target_label: job_name
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_name
-                      target_label: signoz_k8s_name
+                      target_label: k8s_name
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_instance
-                      target_label: signoz_k8s_instance
+                      target_label: k8s_instance
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_pod_label_app_kubernetes_io_component
-                      target_label: signoz_k8s_component
+                      target_label: k8s_component
                     - action: replace
                       source_labels:
                       - __meta_kubernetes_namespace

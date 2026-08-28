@@ -106,10 +106,10 @@ spec:
           env:
             {{- include "snippet.otlp-env" . | nindent 12 }}
             {{- include "snippet.k8s-env" . | nindent 12 }}
-            - name: SIGNOZ_COMPONENT
+            - name: OTEL_COMPONENT
               value: {{ default "otel-agent" .Values.otelAgent.name }}
             - name: OTEL_RESOURCE_ATTRIBUTES
-              {{- $attribs := "signoz.component=$(SIGNOZ_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME),k8s.node.name=$(K8S_NODE_NAME),host.name=$(K8S_NODE_NAME)" }}
+              {{- $attribs := "otel.component=$(OTEL_COMPONENT),k8s.cluster.name=$(K8S_CLUSTER_NAME),k8s.node.name=$(K8S_NODE_NAME),host.name=$(K8S_NODE_NAME)" }}
               {{- if .Values.presets.resourceDetection.envResourceAttributes }}
               {{- $attribs = printf "%s,%s" $attribs .Values.presets.resourceDetection.envResourceAttributes }}
               {{- end }}

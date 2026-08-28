@@ -4,14 +4,18 @@ templates:
   - otel-agent/configmap.yaml
 release:
   name: k8s-infra
-  namespace: signoz
+  namespace: platform
 set:
   otelCollectorEndpoint: otelendpoint:443
-  signozApiKey: signozapikey
+  apiKey: otelapikey
+  otelExporterHeaders:
+    x-api-key: "${env:OTEL_API_KEY}"
   presets:
     selfTelemetry:
       endpoint: selftelemetryhost:443
-      signozApiKey: selftelemetryapikey
+      apiKey: selftelemetryapikey
+      headers:
+        x-api-key: "${env:OTEL_SELF_TELEMETRY_API_KEY}"
       traces:
         enabled: true
       metrics:
@@ -25,6 +29,8 @@ set:
       enabled: false
     otlpExporter:
       enabled: true
+    otlphttpExporter:
+      enabled: false
     logsCollection:
       enabled: false
     hostMetrics:
@@ -50,14 +56,14 @@ tests:
               otlp:
                 endpoint: ${env:OTEL_EXPORTER_OTLP_ENDPOINT}
                 headers:
-                  signoz-access-token: ${env:SIGNOZ_API_KEY}
+                  x-api-key: ${env:OTEL_API_KEY}
                 tls:
                   insecure: true
                   insecure_skip_verify: false
               otlphttp/self_telemetry:
                 endpoint: selftelemetryhost:443
                 headers:
-                  signoz-ingestion-key: ${env:SIGNOZ_SELF_TELEMETRY_API_KEY}
+                  x-api-key: ${env:OTEL_SELF_TELEMETRY_API_KEY}
                 tls:
                   insecure: true
                   insecure_skip_verify: true
@@ -79,7 +85,7 @@ tests:
             receivers:
               filelog/self_logs:
                 include:
-                - /var/log/pods/signoz_k8s-infra*-k8s-infra-*/*/*.log
+                - /var/log/pods/platform_k8s-infra*-k8s-infra-*/*/*.log
                 include_file_name: false
                 include_file_path: true
                 operators:
@@ -139,7 +145,7 @@ tests:
                           compression: gzip
                           endpoint: selftelemetryhost:443
                           headers:
-                            signoz-ingestion-key: ${env:SIGNOZ_SELF_TELEMETRY_API_KEY}
+                            x-api-key: ${env:OTEL_SELF_TELEMETRY_API_KEY}
                           insecure: true
                           protocol: http/protobuf
                 resource:
@@ -156,7 +162,7 @@ tests:
                           compression: gzip
                           endpoint: selftelemetryhost:443
                           headers:
-                            signoz-ingestion-key: ${env:SIGNOZ_SELF_TELEMETRY_API_KEY}
+                            x-api-key: ${env:OTEL_SELF_TELEMETRY_API_KEY}
                           insecure: true
                           protocol: http/protobuf
                   propagators:

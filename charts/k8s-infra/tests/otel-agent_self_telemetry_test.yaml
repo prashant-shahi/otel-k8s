@@ -4,12 +4,14 @@ templates:
   - otel-agent/configmap.yaml
 release:
   name: k8s-infra
-  namespace: signoz
+  namespace: platform
 set:
   presets:
     selfTelemetry:
       endpoint: myhost:443
-      signozApiKey: myapikey
+      apiKey: myapikey
+      headers:
+        x-api-key: "${env:OTEL_SELF_TELEMETRY_API_KEY}"
       traces:
         enabled: true
       metrics:
@@ -22,6 +24,8 @@ set:
     debugExporter:
       enabled: false
     otlpExporter:
+      enabled: false
+    otlphttpExporter:
       enabled: false
     logsCollection:
       enabled: false
@@ -48,7 +52,7 @@ tests:
               otlphttp/self_telemetry:
                 endpoint: myhost:443
                 headers:
-                  signoz-ingestion-key: ${env:SIGNOZ_SELF_TELEMETRY_API_KEY}
+                  x-api-key: ${env:OTEL_SELF_TELEMETRY_API_KEY}
                 tls:
                   insecure: true
                   insecure_skip_verify: true
@@ -70,7 +74,7 @@ tests:
             receivers:
               filelog/self_logs:
                 include:
-                - /var/log/pods/signoz_k8s-infra*-k8s-infra-*/*/*.log
+                - /var/log/pods/platform_k8s-infra*-k8s-infra-*/*/*.log
                 include_file_name: false
                 include_file_path: true
                 operators:
@@ -109,7 +113,7 @@ tests:
                           compression: gzip
                           endpoint: myhost:443
                           headers:
-                            signoz-ingestion-key: ${env:SIGNOZ_SELF_TELEMETRY_API_KEY}
+                            x-api-key: ${env:OTEL_SELF_TELEMETRY_API_KEY}
                           insecure: true
                           protocol: http/protobuf
                 resource:
@@ -126,7 +130,7 @@ tests:
                           compression: gzip
                           endpoint: myhost:443
                           headers:
-                            signoz-ingestion-key: ${env:SIGNOZ_SELF_TELEMETRY_API_KEY}
+                            x-api-key: ${env:OTEL_SELF_TELEMETRY_API_KEY}
                           insecure: true
                           protocol: http/protobuf
                   propagators:
