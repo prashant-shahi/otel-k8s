@@ -1,57 +1,64 @@
 # otel-k8s
 
 Vendor-neutral Helm charts for collecting Kubernetes telemetry with
-[OpenTelemetry](https://opentelemetry.io/) and exporting it over OTLP to any
-compatible observability backend.
+[OpenTelemetry](https://opentelemetry.io/) and shipping it over OTLP to any
+backend that speaks the protocol.
 
 ## Charts
 
 | Chart | Description |
 | --- | --- |
-| [`k8s-infra`](./charts/k8s-infra) | DaemonSet + Deployment OpenTelemetry Collectors that collect node/pod metrics, container logs and Kubernetes events. |
+| [`k8s-infra`](./charts/k8s-infra) | DaemonSet and Deployment OpenTelemetry Collectors that gather node and pod metrics, container logs, and Kubernetes events. |
 | [`otel-gateway`](./charts/otel-gateway) | An OpenTelemetry gateway collector that fronts OTLP traffic for a cluster. |
 
 ## TL;DR
 
 ```bash
-helm install -n platform --create-namespace my-release ./charts/k8s-infra --set otelCollectorEndpoint=https://otlp.example.com:443
+helm repo add otel-k8s https://prashant-shahi.github.io/otel-k8s
+helm repo update
+helm install -n platform --create-namespace my-release otel-k8s/k8s-infra \
+  --set otelCollectorEndpoint=https://otlp.example.com:443
 ```
+
+No chart versions have been published yet, so the repository index is still
+empty. Until the first release lands, install from a clone of this repo with
+`helm install ... ./charts/k8s-infra` instead.
 
 ## Before you begin
 
 ### Set up a Kubernetes cluster
 
-The quickest way to set up a staging/production Kubernetes cluster is with [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/),
-[AWS Elastic Kubernetes Service](https://aws.amazon.com/eks/) or [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/)
-using their respective quick-start guides.
+The quickest way to get a staging or production cluster going is with
+[Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/),
+[AWS Elastic Kubernetes Service](https://aws.amazon.com/eks/) or
+[Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/),
+following their respective quick-start guides.
 
-For setting up Kubernetes on other cloud platforms, bare-metal servers, or a local machine, refer to the Kubernetes
-[getting started guide](https://kubernetes.io/docs/setup/).
+For other cloud platforms, bare-metal servers, or a local machine, see the
+Kubernetes [getting started guide](https://kubernetes.io/docs/setup/).
 
-For local development, a lightweight cluster works well:
+For local development, a lightweight cluster works well. Try
 [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation),
 [k3d](https://k3d.io/#installation) or
 [minikube](https://minikube.sigs.k8s.io/docs/start/).
 
 ### Install kubectl
 
-The [Kubernetes](https://kubernetes.io/) command-line tool, `kubectl`, allows you to
-run commands against Kubernetes clusters. You can use kubectl to deploy applications,
-inspect and manage cluster resources, and view logs.
-
-To install `kubectl`, follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+`kubectl` is the [Kubernetes](https://kubernetes.io/) command-line tool. You
+use it to deploy applications, inspect and manage cluster resources, and read
+logs. Installation instructions are
+[here](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
 ### Install Helm
 
-[Helm](https://helm.sh/) is a tool for managing Kubernetes charts. Charts are packages
-of pre-configured Kubernetes resources.
-
-To install Helm, follow the instructions [here](https://helm.sh/docs/intro/install/).
+[Helm](https://helm.sh/) manages Kubernetes charts, which are packages of
+pre-configured Kubernetes resources. Installation instructions are
+[here](https://helm.sh/docs/intro/install/).
 
 ## Choosing a backend
 
-The charts do not assume any particular vendor. Point them at your OTLP endpoint
-and supply whatever authentication header that backend expects:
+The charts do not assume any particular vendor. Point them at your OTLP
+endpoint and send whatever authentication header that backend expects.
 
 ```yaml
 otelCollectorEndpoint: https://otlp.example.com:443
@@ -64,7 +71,8 @@ otelExporterHeaders:
   authorization: "Bearer ${env:OTEL_API_KEY}"
 ```
 
-See the [`k8s-infra` chart README](./charts/k8s-infra/README.md) for the full list of values.
+The [`k8s-infra` chart README](./charts/k8s-infra/README.md) lists every value
+you can set.
 
 ## Development
 

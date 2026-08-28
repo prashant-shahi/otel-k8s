@@ -5,11 +5,12 @@
 
 Monitoring your Kubernetes cluster is essential for ensuring performance, stability, and reliability. The `k8s-infra` Helm chart provides a comprehensive solution for collecting metrics, logs, and events from your entire Kubernetes environment and exporting them over OTLP to any OpenTelemetry-compatible backend.
 
-### TL;DR;
+### TL;DR
 
 ```sh
-git clone https://github.com/prashant-shahi/otel-k8s.git
-helm install -n platform --create-namespace "my-release" ./otel-k8s/charts/k8s-infra \
+helm repo add otel-k8s https://prashant-shahi.github.io/otel-k8s
+helm repo update
+helm install -n platform --create-namespace "my-release" otel-k8s/k8s-infra \
   --set otelCollectorEndpoint=https://otlp.example.com:443
 ```
 
@@ -30,8 +31,14 @@ The chart is vendor-neutral: point `otelCollectorEndpoint` at any OTLP endpoint 
 To install the chart with the release name `my-release`:
 
 ```bash
-helm -n platform --create-namespace install "my-release" ./charts/k8s-infra
+helm repo add otel-k8s https://prashant-shahi.github.io/otel-k8s
+helm repo update
+helm -n platform --create-namespace install "my-release" otel-k8s/k8s-infra
 ```
+
+No chart versions have been published yet, so the repository index is still
+empty. Until the first release lands, install from a clone of this repo with
+`helm install ... ./charts/k8s-infra` instead.
 
 #### Pointing the chart at your backend
 
@@ -153,8 +160,8 @@ kubectl delete namespace platform
 > ```
 >
 > **`selfLogs` means this chart's own pods.** It previously also matched pods of a
-> co-installed SigNoz backend. `whitelist.selfLogs` now defaults to `false`
-> (it was `true`); `blacklist.selfLogs` still defaults to `true`.
+> co-installed SigNoz backend. `whitelist.selfLogs` now defaults to `false`,
+> where it used to be `true`. `blacklist.selfLogs` still defaults to `true`.
 >
 > **Pod scrape annotations changed prefix.** Update `signoz.io/scrape`,
 > `signoz.io/port` and `signoz.io/path` on your pods to `opentelemetry.io/*`,
