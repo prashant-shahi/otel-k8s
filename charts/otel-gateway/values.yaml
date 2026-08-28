@@ -1,11 +1,9 @@
 # Default values for otel-gateway.
 replicaCount: 1
 image:
-  # NOTE: this image is not publicly pullable and the chart will not start
-  # without an override. It expects a distribution providing
-  # /usr/local/bin/otelgateway with a `migrate` subcommand.
-  # Set this to your own gateway collector image before installing.
-  repository: docker.io/signoz/signoz-otel-gateway
+  # Upstream OpenTelemetry Collector (contrib) distribution, matching the
+  # image used by the k8s-infra chart.
+  repository: otel/opentelemetry-collector-contrib
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -44,11 +42,6 @@ service:
       containerPort: 13133
       servicePort: 13133
       protocol: TCP
-    admin:
-      enabled: true
-      containerPort: 8001
-      servicePort: 8001
-      protocol: TCP
     otlp-grpc:
       enabled: true
       containerPort: 4317
@@ -63,16 +56,6 @@ service:
       enabled: true
       containerPort: 8888
       servicePort: 8888
-      protocol: TCP
-    httplog-heroku:
-      enabled: true
-      containerPort: 8081
-      servicePort: 8081
-      protocol: TCP
-    httplog-json:
-      enabled: true
-      containerPort: 8082
-      servicePort: 8082
       protocol: TCP
 resources: {}
 # We usually recommend not to specify default resources and to leave this as a conscious
@@ -122,64 +105,83 @@ tolerations: []
 affinity: {}
 # Define env as key value pairs
 env: {}
-args: {}
-# -
+# command -- Override the image entrypoint. Empty uses the image default
+# (/otelcol-contrib for the upstream contrib image).
+command: []
+# args -- Extra arguments appended after --config.
+args: []
 
 config:
   # Create the config map
   create: true
-  # Set the values of the config map
-  # extensions:
-  #   health_check:
-  # receivers:
-  #   otlp:
-  #     protocols:
-  #       grpc:
-  #         endpoint: 0.0.0.0:4317
-  #         include_metadata: true
-  #         max_recv_msg_size_mib: 16
-  #       http:
-  #         cors:
-  #           allowed_origins:
-  #             - '*'
-  #         endpoint: 0.0.0.0:4318
-  #         include_metadata: true
-  # processors:
-  #   batch:
-  #     send_batch_max_size: 10000
-  #     send_batch_size: 10000
-  #     timeout: 10s
-  #   memory_limiter: null
-  # exporters:
-  #   debug: {}
-  # service:
-  #   extensions:
-  #     - health_check
-  #   pipelines:
-  #     logs:
-  #       exporters:
-  #         - debug
-  #       processors:
-  #         - memory_limiter
-  #         - batch
-  #       receivers:
-  #         - otlp
-  #     metrics:
-  #       exporters:
-  #         - debug
-  #       processors:
-  #         - memory_limiter
-  #         - batch
-  #       receivers:
-  #         - otlp
-  #     traces:
-  #       exporters:
-  #         - debug
-  #       processors:
-  #         - memory_limiter
-  #         - batch
-  #       receivers:
-  #         - otlp
+  # Collector configuration, rendered verbatim into the ConfigMap and passed
+  # to the collector via --config. Replace the `debug` exporter with an OTLP
+  # exporter pointing at your backend before using this in anger.
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+          include_metadata: true
+          max_recv_msg_size_mib: 16
+        http:
+          endpoint: 0.0.0.0:4318
+          include_metadata: true
+          cors:
+            allowed_origins:
+              - '*'
+  processors:
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 80
+      spike_limit_percentage: 20
+    batch:
+      send_batch_size: 10000
+      send_batch_max_size: 10000
+      timeout: 10s
+  exporters:
+    debug: {}
+  extensions:
+    health_check:
+      endpoint: 0.0.0.0:13133
+  service:
+    extensions:
+      - health_check
+    telemetry:
+      logs:
+        encoding: json
+      metrics:
+        readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: 0.0.0.0
+                  port: 8888
+    pipelines:
+      traces:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - debug
+      metrics:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - debug
+      logs:
+        receivers:
+          - otlp
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - debug
 
 store:
   # Create the in memory store
@@ -231,16 +233,6 @@ ingress:
           - path: /v1/traces
             pathType: ImplementationSpecific
             port: 4318
-      - host: gateway.example.com
-        paths:
-          - path: /logs/json
-            pathType: ImplementationSpecific
-            port: 8082
-      - host: gateway.example.com
-        paths:
-          - path: /logs/heroku
-            pathType: ImplementationSpecific
-            port: 8081
   - name: grpc
     ingressClassName: nginx
     annotations:

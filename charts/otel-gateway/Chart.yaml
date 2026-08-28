@@ -3,7 +3,7 @@ name: otel-gateway
 description: A Helm chart for deploying an OpenTelemetry gateway collector
 type: application
 version: 0.1.0
-appVersion: "v0.0.16"
+appVersion: "0.139.0"
 keywords:
   - OpenTelemetry
   - otel

@@ -31,16 +31,6 @@ spec:
       serviceAccountName: {{ include "otel-gateway.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      initContainers:
-        - name: migrate
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - /usr/local/bin/otelgateway
-          args:
-            - migrate
-          env:
-            {{- include "otel-gateway.env" . | nindent 12 }}
       containers:
         - name: gateway
           securityContext:
@@ -55,12 +45,13 @@ spec:
               protocol: {{ $port.protocol }}
             {{- end }}
             {{- end }}
+          {{- with .Values.command }}
           command:
-            - /usr/local/bin/otelgateway
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
-            - collector
             {{- if .Values.config.create }}
-            - --config=file:/conf/config.yaml
+            - --config=/conf/config.yaml
             {{- end }}
             {{- range .Values.args }}
             - {{ . | quote }}
