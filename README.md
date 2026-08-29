@@ -8,7 +8,7 @@ OpenTelemetry and exporting it over OTLP to any compatible backend.
 
 | Chart | Description |
 | --- | --- |
-| `k8s-infra` | DaemonSet + Deployment OpenTelemetry Collectors for node/pod metrics, container logs and Kubernetes events. |
+| `k8s-infra` | DaemonSet and Deployment OpenTelemetry Collectors for node/pod metrics, container logs and Kubernetes events. |
 | `otel-gateway` | An OpenTelemetry gateway collector that fronts OTLP traffic for a cluster. |
 
 ## Usage
@@ -16,7 +16,7 @@ OpenTelemetry and exporting it over OTLP to any compatible backend.
 ```bash
 helm repo add otel-k8s https://prashant-shahi.github.io/otel-k8s
 helm repo update
-helm install -n platform --create-namespace my-release otel-k8s/k8s-infra \
+helm install my-release otel-k8s/k8s-infra \
   --set otelCollectorEndpoint=https://otlp.example.com:443
 ```
 
